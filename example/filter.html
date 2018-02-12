@@ -1,0 +1,176 @@
+<script src="../tinytest.js"></script>
+<script src="adder.js"></script>
+<script>
+
+// Example 1 - MAKE SURE IT RUNS X NUMBER OF TIMES
+// filter([1,2,3], function(){
+// });
+
+// Example 2 - MAKE SURE IT RETURNS A NUMBER
+// filter([1,2,3], function(number) {
+//   console.log(number);
+// }); // [1,2,3]
+
+// Example 3 - MAKE SURE IT RETURNS AN INDEX
+// filter[1,2,3], function(number,index) {
+//   console.log(index);
+// }); // [1,2,3]
+
+// Example 4 - MAKE SURE IT RETURNS AN ORIGINAL ARRAY
+// filter([1,2,3], function(number,index, originalArray) {
+//   console.log(originalArray);
+// }); // [1,2,3]
+
+// Example 5 - MAKE SURE IT CAN HANDLE OPTIONAL "THIS" INITIAL arg
+// filter([1,2,3], function(){}, {name: 'Gordon'})
+// console.log(this.name);
+// }, {name: 'Gordon'});
+
+// Example 6: - MAKE SURE FILTERED PASSES A DIFFERENT ARRAY
+// var testArray = [1,2,3];
+// var filteredArray = filter(testArray, function(){}, {})
+// testArray !== filteredArray
+
+// Example 7: - MAKE SURE FILTER ACTUALLY CHANGES NEW ARRAY RETURNED
+// var testArray = [1,2,3];
+// var filteredArray = filter(testArray, function(element){
+// return element >1;
+// })
+// Expect filteredArray to be [2,3]
+
+// Higher Order Function is here, test case are callback functions
+function filter(originalArray, callback, optionalThis){ // function filter(originalArray, function(){}, optionalThis){
+    var filterCallback = callback;
+
+    if (optionalThis) {
+        filterCallback = callback.bind(optionalThis);
+    }
+
+    var filteredArray =[];
+
+    for (var i = 0; i<originalArray.length; i++){
+        if (filterCallback(originalArray[i], i, originalArray)){
+            filteredArray.push(originalArray[i]);
+        };
+    }
+    return filteredArray;
+};
+
+tests({
+    // function filter(originalArray, callback){
+    //     for (var i = 0; i<originalArray.length; i++){
+    //         callback();
+    //     }
+    // }
+  '1 - It should run the callback function array.length times': function() {
+      var numberOfTimesCallbackHasRun = 0;
+      filter([1,2,3], function() {
+        numberOfTimesCallbackHasRun++;
+      });
+      eq(numberOfTimesCallbackHasRun, 3);
+  },
+  // function filter(originalArray, callback){
+  //     for (var i = 0; i<originalArray.length; i++){
+  //         callback(originalArray[i]);
+  //     }
+  // }
+  '2 - it should pass in the ith element as the first argument to the callback': function() {
+      filter([1], function(number) {
+        eq(number, 1);
+      });
+  },
+  // function filter(originalArray, callback){
+  //     for (var i = 0; i<originalArray.length; i++){
+  //         callback(originalArray[i], i);
+  //     }
+  // }
+  '3 - It should pass in the ith position as the 2nd argument to the callback': function() {
+      filter([1], function(number,index) { // we use "1" just as a simple test
+        eq(index,0); // 0 as array index start at 0
+      });
+  },
+  // function filter(originalArray, callback){
+  //     for (var i = 0; i<originalArray.length; i++){
+  //         callback(originalArray[i], i, originalArray);
+  //     }
+  // }
+  '4 - It should pass original array to as the third argument to the callback.': function() {
+      var testArray = [1,2,3];
+      filter(testArray, function(number,index, originalArray) {
+        eq(originalArray, testArray);
+      }); // [1,2,3]
+  },
+  // function filter(originalArray, callback, optionalThis){
+  //     var filterCallback = callback;
+  //
+  //     if (optionalThis) {
+  //         filterCallback = callback.bind(optionalThis);
+  //     }
+  //
+  //     for (var i = 0; i<originalArray.length; i++){
+  //         filterCallback(originalArray[i], i, originalArray);
+  //     }
+  // };
+  '5 - It should accept an optional this object': function(){
+      filter([1], function(){
+          eq(this.description, 'I should be accessible inside of the callback');
+      },{description: 'I should be accessible inside of the callback'})
+  },
+  ///////////////////////////////////////////
+  // TEST CASE 6 AND 7 ARE UNIQUE TO FILTER ////////////
+  ///////////////////////////////////////////
+
+
+  // function filter(originalArray, callback, optionalThis){ // function filter(originalArray, function(){}, optionalThis){
+  //     var filterCallback = callback;
+  //
+  //     if (optionalThis) {
+  //         filterCallback = callback.bind(optionalThis);
+  //     }
+  //
+  //     for (var i = 0; i<originalArray.length; i++){
+  //         filterCallback(originalArray[i], i, originalArray);
+  //     }
+  //     return [];
+  // };
+  '6A - It should return an array': function(){
+      var filteredArray = filter([], function(){});
+      // filteredArray is actually an Array.
+      eq(Array.isArray(filteredArray), true); // we're checking if getting a return of undefined
+  },
+  // It should return a new array, not the array being filtered
+  '6B - The returned array should not be the original array filtered': function(){
+      var arrayBeingFiltered = [];
+      var filteredArray = filter(arrayBeingFiltered, function(){});
+      // filteredArray is not equal to testArray.
+      eq(arrayBeingFiltered !== filteredArray, true); // even if the function is returning [], there different memory addresses
+  },
+
+  // function filter(originalArray, callback, optionalThis){ // function filter(originalArray, function(){}, optionalThis){
+  //     var filterCallback = callback;
+  //
+  //     if (optionalThis) {
+  //         filterCallback = callback.bind(optionalThis);
+  //     }
+  //
+  //     var filteredArray =[];
+  //
+  //     for (var i = 0; i<originalArray.length; i++){
+  //         if (filterCallback(originalArray[i], i, originalArray)){
+  //             filteredArray.push(originalArray[i]);
+  //         };
+  //     }
+  //     return filteredArray;
+  // };
+
+  // It should return a new array that only has elements where callback() is true
+  '7 - It should return a new array that only has elements where callback is true': function(){
+      var filteredArray = filter([1,2], function(number) {
+          return number > 1;
+      });
+      eq(filteredArray.length, 1);
+      eq(filteredArray[0], [2]);
+  }
+});
+
+</script>
