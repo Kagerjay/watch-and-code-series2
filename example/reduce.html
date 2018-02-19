@@ -21,8 +21,6 @@
 
 // Returns a single value.
 
-
-
 function reduce(array, callback, initialValue){
 
     // Need to check if array is empty and initial value
@@ -31,18 +29,19 @@ function reduce(array, callback, initialValue){
     var startingIndex = 0;
     var resultSoFar = initialValue;
     var length = array.length;
+    var arrayIndexes = Object.keys(array);
 
     // no initialValue
     if (arguments.length < 3){
         // Array is empty, throw isTypeError
-        if (Object.keys(array).length === 0){
+        if (arrayIndexes.length === 0){
             throw new TypeError('Reduce of empty array with no initial value');
         }
 
         // [,].length === 1;
         // If array has one element, just return it
-        if (Object.keys(array).length === 1) {
-            var onlyIndex = Object.keys(array)[0]; // returns position of first nonnull element
+        if (arrayIndexes.length === 1) {
+            var onlyIndex = arrayIndexes[0]; // returns position of first nonnull element
             var onlyElement = array[onlyIndex]; // returns value of first nonnull element
             return onlyElement;
         }
