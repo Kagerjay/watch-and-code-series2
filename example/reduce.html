@@ -80,6 +80,7 @@ function reduce(array, callback, initialValue){
 
 tests({
     'IF initialValue, callback should run array.length times': function() {
+        fail();
         var numberOfTimesCallbackHasRun = 0;
         reduce([1], function(){
             numberOfTimesCallbackHasRun++;

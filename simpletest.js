@@ -37,37 +37,57 @@
  * -Joe Walnes
  * MIT License. See https://github.com/joewalnes/jstinytest/
  */
+
+
+
+// DONE: Get Successes to be Green
+// DONE: Make sure only one error per failure goes to the console
+// DONE: Make Failures red
+// DONE: Show stack traces for failures
+// DONE: Only show stack traces if you click expand
+// DONE: Output summary statistics to the DOM
+
+var TinyTestHelper = {
+    renderStats: function(tests, failures){
+        var numberOfTests = Object.keys(tests).length;
+        var successes = numberOfTests - failures;
+
+        var summaryString = 'Ran ' + numberOfTests + ' tests: '
+            + successes + ' successes, '
+            + failures + ' failures ';
+
+        var summaryElement = document.createElement('h1');
+        summaryElement.textContent = summaryString;
+        document.body.appendChild(summaryElement);
+    }
+};
+
 var TinyTest = {
-    // Test is the object we passed (all the code written in W&C)
     run: function(tests) {
         var failures = 0;
-        for (var testName in tests) { // iterate all methods in test
-            var testAction = tests[testName]; // its the function tests we wrote originally
+        for (var testName in tests) {
+            var testAction = tests[testName];
             try {
-                testAction.apply(this); // apply runs immediately with bind
-                console.log('Test:', testName, 'OK');
+                testAction.apply(this);
+                console.log('%c' + testName, "color: green;");
+                //console.log("%cMy stylish message", "color: green");
+                //console.log('%cTest:' + 'hi' + 'OK', "color: green;");
             } catch (e) {
                 failures++;
-                console.error('Test:', testName, 'FAILED', e); // Error: fail() undefined
-                console.error(e.stack); // e.stack is a stacktrace of the error
+                // console.log('%c' + testName, "color: red;"); // change from console.error, so less info shown
+                // console.error(e.stack);
+                console.groupCollapsed('%c' + testName, "color: red;"); //%c is necessary to color console
+                console.error(e.stack);
+                console.groupEnd();
 
-                // at Object.fail (tinytest.js:63) (LAST PLACE THE ERROR WAS THROWN!)
-                // at Object.IF initialValue, callback should run array.length times (reduce.html:83)
-                // at Object.run (tinytest.js:47)
-                // at reduce.html:81  (FIRST AREA IT LOOKED IN)
             }
         }
-        // if you disable setTimeout,background is just white, not red
-        // If you removed setTimeOut function, and just used innerparts, it will be white
         setTimeout(function() { // Give document a chance to complete
             if (window.document && document.body) {
                 document.body.style.backgroundColor = (failures == 0 ? '#99ff99' : '#ff9999'); // green, red respectively
+                TinyTestHelper.renderStats(tests, failures);
             }
         }, 0); // similar to $document.ready from jQuery
-
-        // 1. JavaScript.
-        // 2. Update the DOM.
-        // 3. Extra tasks (e.g. callbacks passed into setTimeOut)
     },
 
     fail: function(msg) {
